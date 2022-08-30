@@ -26,18 +26,17 @@ class Block:
 		return curr_hash
 
 	def consensus(self):
-		expected_hash = self.calculate_hash()
-		print("Comparing Hashes: " + str(self.hash) + " and " + str(expected_hash))
-		if self.hash == expected_hash or self.is_genesis and self.hash == self.prev_hash:
-			print("Hash validated!")
+		if self.is_genesis and self.prev_hash == self.hash:
 			return True
-		else:
-			print("Hash not same")
-			return False
+		expected_hash = self.calculate_hash()
+		return (expected_hash == self.hash)
 
 class BadHash:
+	def __init__(self):
+		self.seed = time.time()
+
 	def hash(self, data):
-		curr_hash= time.time()
+		curr_hash = self.seed
 		for char in str(data):
 			curr_hash %= ord(char)
 		return curr_hash
@@ -61,12 +60,13 @@ class Ledger:
 				print("      Data: " + datum +",")
 
 			print("      Hash: " + str(item.hash))
+			print("      Previous Hash:" + str(item.prev_hash))
 			print("      Last signed: " + str(item.timestamp) + "secs")
 			if item.consensus():
-				print("consensus: VERIFIED")
+				print("VALID BLOCK")
 			else:
 				valid = False
-				print("consensus: INVALID HASH")
+				print("INVALID BLOCK")
 			print("")
 		if valid:
 			print("Ledger Consensus: VALID")
