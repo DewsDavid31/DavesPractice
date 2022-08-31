@@ -1,0 +1,36 @@
+			B		TEST_LIST
+			;		Asserts for R1 nd R2 to be equal in binary value
+			;		Returns binary result on R10
+			;		R9 is line counter of tests
+			;		R8 as 0
+			;		R7 as FFFFFFFF
+CONSTANTS
+			LDR 		R8, = 0x0
+			LDR		R7, =0xFFFFFFFF
+			LDR		R9, =0x0
+			MOV 		R10, R7		; Starting value true of test
+			MOV PC, LR
+ASSERT
+			ADD		R9, R9, #0X0000001
+			CMP		R1, R2
+			BEQ		TRUE
+			B		FALSE
+TRUE
+			AND		R10 , R7,  R10
+			B		DONE_ASSERT
+FALSE
+			
+			AND		R10, R8, R10
+			MOV		R6, R9
+			B		DONE_ASSERT
+TEST_LIST	; Where all method calls to test are done.
+			BL		CONSTANTS
+		; 	Tests start here:
+		;	Set R2 to asserted value
+		;	To assert do BL ASSERT
+		
+			
+			B		DONE
+DONE_ASSERT
+			MOV		PC, LR
+DONE

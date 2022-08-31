@@ -1,0 +1,7 @@
+An example program of using Template pattern to change recipes of making tea or coffee.
+This program only deals with producing printed output of steps taken, nothing more.
+To run this program in terminal use:
+
+java BeverageTestDrive
+
+Steps can be modified inside CaffeineBeverageWithHook.java for steps in common, specific hooks will be called by classes used.
