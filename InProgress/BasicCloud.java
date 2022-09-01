@@ -1,7 +1,9 @@
 import java.util.io.*;
 import java.math.Random;
 
-
+private class BadServer{
+	// for now I will make FTP server that queries the others for a needed file, randomly keeping them in every server.
+}
 
 private class Scheduler{
 }
