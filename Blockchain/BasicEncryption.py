@@ -12,10 +12,10 @@ class bad_rsa_key:
   def find_p_q(self,e):
      found = False
      while(not found):
-       p = self.pick_rand_prime(e,100)
-       q = self.pick_rand_prime(e,100)
+       p = self.pick_rand_prime(e + 1,100)
+       q = self.pick_rand_prime(e + 1,100)
        if self.gcd(e,(p-1)*(q-1)) == 1:
-         print("found: p=" + str(p) + " q=" + str(q) + " e=" + str(e))
+         print("found: p=" + str(p) + " q=" + str(q) + " e(private key)=" + str(e))
          found = True
      return p,q
     
@@ -28,7 +28,7 @@ class bad_rsa_key:
   def find_d(self,p,q):
     print("Calculating d")
     d = self.inverse_mod_brute_force(self.e,(p-1)*(q-1))
-    print("Found d=" + str(d))
+    print("Found d(public key)=" + str(d))
     return d
     
   def pick_rand_prime(self,start, cap):
@@ -60,12 +60,12 @@ class bad_rsa_key:
     
 if __name__ == "__main__":
   test_key = bad_rsa_key()
-  test_string = "Hello world!"
-  print("Encrypting " + test_string + "...")
+  test_string = "Hello World!"
+  print("Encrypting: " + test_string + "...")
   output_str = ""
   for charac in test_string:
     output_str += test_key.encrypt_char(charac) + " "
-  print("Encrypted badly: " + output_str)
+  print("Encrypted Into: " + output_str)
   output_chars = output_str.split(' ')
   reverted_str= ""
   for chars in output_chars:
