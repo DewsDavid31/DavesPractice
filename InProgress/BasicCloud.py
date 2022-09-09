@@ -9,19 +9,21 @@ class bad_rsa_key:
     else:
       return self.gcd(b, a%b)
   
-  def find_e(self,p,q):
-     # choose a d that is prime in Z 
+  def find_p_q(self,e):
      found = False
-     print("Calculating public key")
+     print("Calculating p,q")
      while(not found):
-       e = self.pick_rand_prime(1000)
+       p = self.pick_rand_prime(1000)
+       q = self.pick_rand_prime(1000)
        if self.gcd(e,(p-1)*(q-1)) == 1:
+         print("found: p=" + str(p) + " q=" + str(q) + " e=" + str(e))
          found = True
-     return e
-
+     return p,q
+    
   def find_d(self,p,q):
-    print("Calculating private key")
-    d = (self.e ** -1) % ((p-1)*(q-1)) 
+    print("Calculating d")
+    d = (self.e ** -1 % (p-1)*(q-1))
+    print("Found d=" + str(d))
     return d
     
   def pick_rand_prime(self, cap):
@@ -35,18 +37,21 @@ class bad_rsa_key:
     return candidate
     
   def __init__(self):
-      p = self.pick_rand_prime(1000)
-      q = self.pick_rand_prime(1000)
-      self.e = self.find_e(p,q)
-      self.d = self.find_d(p,q)
-      self.p = p
-      self.q = q
+      self.e = self.pick_rand_prime(1000)
+      self.p,self.q = self.find_p_q(self.e)
+      self.d = self.find_d(self.p, self.q)
 
   def encrypt_char(self, datum):
-    return chr(math.ceil((ord(datum) ** (self.e) % (self.p * self.q))))
+    n = self.p * self.q
+    print("value of " + str(datum) + " is: " + str(ord(datum)))
+    print("Becomes: " + str(math.ceil(((ord(datum) ** self.e) % n))))
+    return chr(math.ceil(((ord(datum) ** self.e) % n)))
 
   def decrypt_char(self, datum):
-    return chr(math.ceil(ord(datum) ** ((self.d)) % (self.p * self.q)))
+    n = self.p * self.q
+    print("value of " + str(datum) + " is: " + str(ord(datum)))
+    print("Becomes: " + str(math.ceil((ord(datum) ** self.d) % (n))))
+    return chr(math.ceil(((ord(datum) ** self.d) % n)))
     
 if __name__ == "__main__":
   test_key = bad_rsa_key()
@@ -54,9 +59,8 @@ if __name__ == "__main__":
   print("Encrypting " + test_string + "...")
   output_str = ""
   for charac in test_string:
-    print(charac + test_key.encrypt_char(charac))
     output_str += test_key.encrypt_char(charac) + " "
-  print("Encyrpted badly: " + output_str)
+  print("Encrypted badly: " + output_str)
   output_chars = output_str.split(' ')
   reverted_str= ""
   for chars in output_chars:
