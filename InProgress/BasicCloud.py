@@ -1,15 +1,13 @@
 import random as random
+import math as math
 
 class bad_rsa_key:
   
   def gcd(self,a,b):
-    if a == 0:
-      return b
-    elif b == 0:
+    if b == 0:
       return a
     else:
       return self.gcd(b, a%b)
-  #recursion fails here
   
   def find_d_e(self,x,n,p,q):
      # choose a d that is prime in Z 
@@ -45,17 +43,17 @@ class bad_rsa_key:
 
   # decrypt D= c^d(modn), encrypt C = D^e(modn)
   def __init__(self):
-      p = self.pick_rand_prime(100)
-      q = self.pick_rand_prime(100)
+      p = self.pick_rand_prime(10)
+      q = self.pick_rand_prime(10)
       n  = p*q
       x = self.linear_totient(p,q)
       self.d,self.e = self.find_d_e(x,n,p,q)
 
   def encrypt_char(self, datum, n):
-    return ord(datum) ** self.e % n
+    return chr((ord(datum) ** self.e) % n)
 
   def decrypt_char(self, datum , n):
-     return chr(datum ** self.d % n)
+     return chr((ord(datum) ** self.d) % n)
     
 if __name__ == "__main__":
   test_key = bad_rsa_key()
@@ -63,14 +61,13 @@ if __name__ == "__main__":
   print("Encrypting " + test_string + "...")
   output_str = ""
   for charac in test_string:
-    output_str += str(test_key.encrypt_char(charac,10)) + " "
-  print("result: " + output_str)
-  print("descrypting " + output_str + "...")
-  reverted = ""
-  for integ in test_string:
-    numeric = int(integ)
-    reverted += str(test_key.decrypt_char(numeric,10))
-  print("result: " + reverted)
-    
-  
+    output_str += test_key.encrypt_char(charac,98) + " "
+  print("Encyrpted badly: " + output_str)
+  output_chars = output_str.split()
+  reverted_str= ""
+  for chars in output_chars:
+    if chars == '':
+      break
+    reverted_str += str(test_key.decrypt_char(chars,98))
+  print("Decrypted badly: " + reverted_str)
     
