@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 import java.util.Random;
-import java.lang.Math.*;
+import java.lang.Math;
 
 class BadKey {
   public Random gen;
@@ -13,20 +13,20 @@ class BadKey {
   public BadKey(int limit) {
     this.gen = new Random();
     this.limit = limit;
-    this.e = pickPrime(2,limit);
-    int[] pnq = this.find_p_q();
-    this.p = pnq[0];
-    this.q = pnq[1];
-    this.d = findD();
+    this.e = this.pickPrime(3, limit);
+    System.out.println("Picked: " + e);
+    this.find_p_q();
+    this.findD();
+    System.out.println("Private: "+ this.p + ", " + this.q + " public: " + this.d + ", " + this.e);
   }
   
   public int pickPrime(int start, int limit){
     int candidate = 2;
     boolean prime = false;
     while(!prime){
-      candidate = gen.nextInt(limit);
+      candidate = gen.nextInt((int) limit - 2) + 2;
       prime = true;
-      if(candidate < start){
+      if(candidate < start || candidate > limit){
         prime = false;
         continue;
       }
@@ -47,7 +47,7 @@ class BadKey {
   }
   
   public int inverseModBrute(int a, int b) {
-    int index = 0;
+    int index = 1;
     while (a * index % b != 1) {
       index++;
     }
@@ -55,40 +55,38 @@ class BadKey {
   }
 
 
-  public int[] find_p_q(){
+  public void find_p_q(){
     boolean found = false;
+    System.out.println("Generating public key...");
     while(!found){
-       p = this.pickPrime(2,e);
-       q = this.pickPrime(2,e);
+       this.p = this.pickPrime(this.e + 1,this.limit);
+       this.q = this.pickPrime(this.e + 1,this.limit);
        int totient = (p-1)*(q-1);
        if(this.gcd(e, totient) == 1){
          found = true;
        }
     }
-    int[] results = {p,q};
-    return results;
   }
 
-  public int findD(){
+  public void findD(){
+    System.out.println("Generating private key...");
     int totient = (p-1)*(q-1);
-    return inverseModBrute(e, totient);
+    this.d = inverseModBrute(this.e, totient);
   }
   
   public char encrypt(char data){
-    int n = p * q;
+    int n = this.p * this.q;
     int numeric = (int) data;
-    System.out.println(Character.toString(data) + numeric);
-    int resultNum = (int) Math.ceil(Math.pow(numeric,e) % n);
+    long resultNum = (int) (Math.ceil(Math.pow(numeric, (double) this.e)) % n);
     char result = (char) resultNum;
-    System.out.println(Character.toString(result) + resultNum);
     return result;
   }
 
   
   public char decrypt(char data){
-    int n = p * q;
+    int n = this.p * this.q;
     int numeric = (int) data;
-    int resultNum = (int) Math.ceil(Math.pow(numeric,d) % n);
+    int resultNum = (int) (Math.ceil(Math.pow(numeric, (double) this.d)) % n);
     char result = (char) resultNum;
     return result;
   }
@@ -97,8 +95,8 @@ class BadKey {
 class User {
   private BadKey key1;
 
-  public User() {
-    this.key1 = new BadKey(10000);
+  public User(int cap) {
+    this.key1 = new BadKey(cap);
   }
 
   public String encrypt(String data) {
@@ -106,19 +104,20 @@ class User {
     System.out.println("Encrypting \"" + data + "\" for uploading...");
     for (int index = 0; index < data.length(); index++) {
       char next = data.charAt(index);
-      char nextResult = key1.encrypt(next);
-      result += Character.toString(nextResult);
+      char nextResult = this.key1.encrypt(next);
+      result += nextResult;
     }
-    System.out.println("Converted to: " + result);
+    System.out.println("Encrypted to: " + result);
     return result;
   }
 
   public String decrypt(String data) {
     String result = "";
+    System.out.println("Decrypting \"" + data + "\" for reading...");
     for (int index = 0; index < data.length(); index++) {
       char next = data.charAt(index);
-      char nextResult = key1.decrypt(next);
-      result += Character.toString(nextResult);
+      char nextResult = this.key1.decrypt(next);
+      result += nextResult;
     }
     return result;
   }
@@ -133,7 +132,7 @@ class Cloud {
 
   public String read(User user, int index) {
     String unparsed = uploads.get(index);
-    return user.decrypt(unparsed);
+    return "Decrypted to: " + user.decrypt(unparsed);
 
   }
 
@@ -145,7 +144,7 @@ class Cloud {
 class Main {
   public static void main(String[] args) {
     Cloud testCloud = new Cloud();
-    User me = new User();
+    User me = new User(100);
     testCloud.upload(me, "I can see this!");
     System.out.println(testCloud.read(me, 0));
   }
