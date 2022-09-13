@@ -232,6 +232,7 @@ class Cloud {
       case "4":
          System.out.print("Enter text: ");
          String inputText = this.scanner.next();
+         this.scanner.nextLine();
          System.out.println();
          this.upload(us, inputText);
          this.menu();
