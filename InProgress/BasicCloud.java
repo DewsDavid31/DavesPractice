@@ -138,23 +138,26 @@ class Cloud {
   public ArrayList<String> uploads;
   public ArrayList<User> pcs;
   public ArrayList<String> blocktable;
+  Random gen;
   public Scanner scanner;
   public Cloud(Scanner scanner) {
     this.uploads = new ArrayList<String>();
     this.pcs = new ArrayList<User>();
     this.scanner = new Scanner(System.in);
+    this.gen = new Random();
   }
 
   public void registerUser(User newUser) {
     this.pcs.add(newUser);
   }
 
-  public void loadBalanceRoundRobin() {
+  public void loadBalance() {
     System.out.println("\nDecentralizing files...");
     int pcSize = this.pcs.size();
     for (int index = this.uploads.size() - 1; index >= 0; index--) {
+      int nextUser = this.gen.nextInt(pcSize - 1);
       String next = this.uploads.get(index);
-      this.pcs.get(index % pcSize).write(next);
+      this.pcs.get(nextUser).write(next);
     }
     this.uploads.clear();
     System.out.println("Done!");
@@ -176,6 +179,7 @@ class Cloud {
           System.out.println("File #" + item + ": " + decryptedStr);
         }
       }
+      System.out.println();
    }
     System.out.println("Files Uploading currently: ");
     for(int grabUploads = 0; grabUploads < this.uploads.size(); grabUploads++ ){
@@ -184,26 +188,30 @@ class Cloud {
           System.out.println("File #" + grabUploads + ": " + decryptedStr);
         }
     }
+    System.out.println();
   }
   
-  public void fetchAll(){
+  public void fetchAll(User querer){
     for(int grabUser = 0; grabUser < this.pcs.size(); grabUser++){
       User nextUser = this.pcs.get(grabUser);
       int harddriveSize = nextUser.hardDrive.size();
       System.out.println(nextUser.name + " \'s harddrive: ");
       for(int item = 0; item < harddriveSize; item++){
-        System.out.println("File #" + item + ": " + nextUser.hardDrive.get(item));
+        System.out.println("File #" + item + ": " + querer.decrypt(nextUser.hardDrive.get(item)));
       }
+     System.out.println();
    }
+    System.out.println();
     System.out.println("Files Uploading currently: ");
     for(int grabUploads = 0; grabUploads < this.uploads.size(); grabUploads++ ){
-      System.out.println("File #" + grabUploads + ": " + this.uploads.get(grabUploads));
+      System.out.println("File #" + grabUploads + ": " + querer.decrypt(this.uploads.get(grabUploads)));
     }
+    System.out.println();
   }
 
   public void upload(User user, String data) {
     System.out.println("\n" + user.name + " is encrypting \"" + data + "\" for upload");
-    this.uploads.add(user.encrypt("user.name :" + data));
+    this.uploads.add(user.encrypt(user.name + ":" + data));
   }
    public void menu(){
      System.out.println("Log into a user:");
@@ -213,7 +221,10 @@ class Cloud {
      System.out.print("Select a number: ");
      int option = this.scanner.nextInt();
      User us = this.pcs.get(option);
-     
+     this.loggedMenu(us);
+   }
+
+   public void loggedMenu(User us){
     System.out.println("\nWelcome to the cloud drive " + us.name + "! Pick an option");
     System.out.println("1. Read my harddrive directly");
     System.out.println("2. Ask Cloud to fetch my files");
@@ -222,22 +233,24 @@ class Cloud {
     System.out.println("5. Quit");
     System.out.print("Select a number: ");
     String optionStr = this.scanner.next();
+    this.scanner.nextLine();
     switch(optionStr){
       case "1": us.read();
-         this.menu();
+         this.loggedMenu(us);
       case "2": this.fetch(us);
-         this.menu();
-      case "3": this.fetchAll();
-         this.menu();
+         this.loggedMenu(us);
+      case "3": this.fetchAll(us);
+         this.loggedMenu(us);
       case "4":
-         System.out.print("Enter text: ");
-         String inputText = this.scanner.next();
+         System.out.print("Enter text and press enter twice: ");
+         String inputText = this.scanner.nextLine();
          this.scanner.nextLine();
          System.out.println();
          this.upload(us, inputText);
-         this.menu();
+         this.loadBalance();
+         this.loggedMenu(us);
       default:
-        break;
+        this.menu();
     }
   }
 }
