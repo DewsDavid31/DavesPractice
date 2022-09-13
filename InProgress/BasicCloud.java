@@ -203,7 +203,7 @@ class Cloud {
 
   public void upload(User user, String data) {
     System.out.println("\n" + user.name + " is encrypting \"" + data + "\" for upload");
-    this.uploads.add(user.encrypt(user.name + ": " + data));
+    this.uploads.add(user.encrypt("user.name :" + data));
   }
    public void menu(){
      System.out.println("Log into a user:");
@@ -229,7 +229,11 @@ class Cloud {
          this.menu();
       case "3": this.fetchAll();
          this.menu();
-      case "4": us.write(this.scanner.nextLine());
+      case "4":
+         System.out.print("Enter text: ");
+         String inputText = this.scanner.next();
+         System.out.println();
+         this.upload(us, inputText);
          this.menu();
       default:
         break;
