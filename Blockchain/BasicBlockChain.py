@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+
 class Block:
 	def __init__(self, data, hash_func, hash_seed, prev_hash, is_genesis, timestamp):
 		self.data = data
@@ -28,7 +29,7 @@ class Block:
 		return curr_hash
 
 	def consensus(self):
-		if self.is_genesis and self.prev_hash == self.hash:
+		if self.is_genesis:
 			return True
 		expected_hash = self.calculate_hash()
 		return (expected_hash == self.hash)
