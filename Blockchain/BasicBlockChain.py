@@ -1,5 +1,64 @@
 import time
 from datetime import datetime
+import random as random
+import math as math
+
+class bad_rsa_key:
+  
+  def gcd(self,a,b):
+    if b == 0:
+      return a
+    else:
+      return self.gcd(b, a%b)
+  
+  def find_p_q(self,e):
+     found = False
+     while(not found):
+       p = self.pick_rand_prime(e + 1,100)
+       q = self.pick_rand_prime(e + 1,100)
+       if self.gcd(e,(p-1)*(q-1)) == 1:
+         print("found: p=" + str(p) + " q=" + str(q) + " e(private key)=" + str(e))
+         found = True
+     return p,q
+    
+  def inverse_mod_brute_force(self, a,b):
+    index = 1
+    while(a*index % b != 1):
+      index = index + 1
+    return index 
+      
+  def find_d(self,p,q):
+    print("Calculating d")
+    d = self.inverse_mod_brute_force(self.e,(p-1)*(q-1))
+    print("Found d(public key)=" + str(d))
+    return d
+    
+  def pick_rand_prime(self,start, cap):
+    prime = False
+    while(not prime):
+      candidate = random.randint(start,cap);
+      prime = True
+      for factors in range(2,candidate):
+        if candidate % factors == 0:
+          prime = False
+    return candidate
+
+
+  def __init__(self):
+      self.e = self.pick_rand_prime(2,100)
+      self.p,self.q = self.find_p_q(self.e)
+      self.d = self.find_d(self.p, self.q)
+
+  def encrypt_char(self, datum):
+    n = self.p * self.q
+    return chr(math.ceil(((ord(datum) ** self.e) % n)))
+
+  def decrypt_char(self, datum):
+    n = self.p * self.q
+    converted_num = math.ceil(((ord(datum) ** self.d) % n))
+    converted = chr(converted_num)
+    print(str(datum) + " is " + str(ord(datum))+ " Decrypts to: " + str(converted_num) + " or " + converted)
+    return chr(math.ceil(((ord(datum) ** self.d) % n)))
 
 class Block:
 	def __init__(self, data, hash_func, hash_seed, prev_hash, is_genesis, timestamp):
@@ -35,14 +94,15 @@ class Block:
 		return (expected_hash == self.hash)
 
 class BadHash:
-	def __init__(self):
-		self.seed = time.time()
-
-	def hash(self, data):
-		curr_hash = self.seed
-		for char in str(data):
-			curr_hash %= ord(char)
-		return curr_hash
+  def __init__(self):
+    self.seed = time.time()
+    self.hash_func = bad_rsa_key().encrypt_char
+    
+  def hash(self, data):
+    curr_hash = self.seed
+    for char in str(data):
+      curr_hash %= ord(self.hash_func(char))
+    return curr_hash
 
 class Ledger:
 	def __init__(self, blocks):
@@ -60,7 +120,7 @@ class Ledger:
 
 	
 	def create_block(self,data_list):
-		new_block = Block(data_list, BadHash(), time.time(), time.time(), True, time.time())
+		new_block = Block(data_list, BadHash(), time.time(), time.time(), False, time.time())
 		self.add_block(new_block)
 
 	def rem_block(self, block_num):
