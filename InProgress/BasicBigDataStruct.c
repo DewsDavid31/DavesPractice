@@ -38,32 +38,44 @@ int* splitl(int* arrayptr, int size){
 
 int* merge(int* arrayptr1,int *arrayptr2, int size1, int size2){
   int* resultptr = malloc((size1 + size2)* sizeof(int));
-  int index1 = 0;
-  int index2 = 0;
-  int resultindex = 0;
-  while(index1 < size1 && index2 < size2){
-    if(index1  >= size1){
-      resultptr[resultindex] = arrayptr2[index2];
-      index2++;
-      resultindex++;
+  int resultIndex = 0;
+  int smallestLIndex = 0;
+  int smallestRIndex = 0;
+  while(1){
+    int smallestL = 2147483647;
+    int smallestR = 2147483647;
+    for(int lindex = 0; lindex < size1; lindex++){
+      if(arrayptr1[lindex] == 0){
+        continue;
+      }
+      if(arrayptr1[lindex] < smallestL){
+        smallestL = arrayptr1[lindex];
+        smallestLIndex = lindex;
+      }
     }
-    else if(index2 >= size2){
-      resultptr[resultindex] = arrayptr1[index1];
-      index1++;
-      resultindex++;
+    for(int rindex = 0; rindex < size2; rindex++){
+      if(arrayptr2[rindex] == 0){
+        continue;
+      }
+      if(arrayptr2[rindex] < smallestR){
+        smallestR = arrayptr2[rindex];
+        smallestRIndex = rindex;
+      }
     }
-    else if(arrayptr1[index1] > arrayptr2[index2]){
-      resultptr[resultindex] = arrayptr2[index2];
-      index2++;
-      resultindex++;
+    if(smallestL == 2147483647 && smallestR == 2147483647){
+      return resultptr;
     }
-    else{
-      resultptr[resultindex] = arrayptr1[index1];
-      index1++;
-      resultindex++;
+    if(smallestL < smallestR){
+      resultptr[resultIndex] = smallestL;
+      resultIndex++;
+      arrayptr1[smallestLIndex] = 0;
     }
-  }
-  return resultptr;
+    if(smallestL >= smallestR){
+      resultptr[resultIndex] = smallestR;
+      resultIndex++;
+      arrayptr2[smallestRIndex] = 0;
+      }
+    }
 }
 
 int* mergesort(int* arrayptr, int size){
@@ -95,6 +107,6 @@ int main(){
   ptr[5] = 76;
 	int* sorted = mergesort(ptr,6);
   for(int printindex = 0; printindex < 6; printindex++){
-    printf("%d", sorted[printindex]);
+    printf("%d, ", sorted[printindex]);
   }
 }
