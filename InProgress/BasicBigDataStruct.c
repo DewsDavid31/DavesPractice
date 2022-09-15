@@ -1,5 +1,45 @@
 #include <stdio.h>
 
+int* btreeify(int* arrayptr, int size){
+  int* tree = malloc((size * 2) *sizeof(int));
+  for(int clearindex = 0; clearindex < (size * 2); clearindex++){
+    tree[clearindex] = 0;
+  }
+  tree[0] = arrayptr[0];
+  int arrayIndex = 1;
+  int treeindex = 0;
+  int selection = 0;
+  int finished = 0;
+  while(arrayIndex < size && treeindex * 2 < size * 2){
+    selection = arrayptr[arrayIndex];
+    if(selection < tree[treeindex]){
+      if(tree[2*treeindex + 1] != 0){
+        finished++;
+      }
+      else{
+         tree[2*treeindex + 1] = selection;
+         arrayIndex++;
+         selection = arrayptr[arrayIndex]; 
+        }
+    }
+    if(selection >= tree[treeindex]){
+      if(tree[2*treeindex + 2] != 0){
+        finished++;
+      }
+      else{
+         tree[2*treeindex + 2] = selection;
+         arrayIndex++;
+         selection = arrayptr[arrayIndex];
+        }
+    }
+    if(finished == 2){
+      finished = 0;
+      treeindex++;
+    }
+  }
+  return tree;
+}
+
 int* splitr(int* arrayptr, int size){
   int splitsize1 = size/2;
   int splitsize2 = size - splitsize1;
@@ -105,8 +145,8 @@ int main(){
   ptr[3] = 2;
   ptr[4] = 5;
   ptr[5] = 76;
-	int* sorted = mergesort(ptr,6);
-  for(int printindex = 0; printindex < 6; printindex++){
-    printf("%d, ", sorted[printindex]);
+	int* treed = btreeify(ptr,6);
+  for(int printindex = 0; printindex < 12; printindex++){
+    printf("%d, ", treed[printindex]);
   }
 }
