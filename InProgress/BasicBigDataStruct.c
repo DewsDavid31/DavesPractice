@@ -157,7 +157,8 @@ int* mergesort(int* arrayptr, int size){
 
 void showSSTable(struct SSTable table){
   printf("sstable:\n");
-  for(int index = 0; index < (*table.currentSeg); index++){
+  int current = table.currentSeg[0];
+  for(int index = 0; index <= current; index++){
     printf("segment %d: ",index);
     int* nextSeg = table.segtable[index];
     for(int arrayindex = 0; arrayindex < table.segsizes[index]; arrayindex++){
@@ -168,54 +169,47 @@ void showSSTable(struct SSTable table){
 }
 
 void flush(int* tree, int size, struct SSTable table){
-  table.segsizes[*table.currentSeg] = size;
+  (*table.currentSeg)++;
+  int nextseg = table.currentSeg[0];
+  table.segsizes[nextseg] = size;
   int* segment = malloc(size * sizeof(int));
   for(int flushindex = 0; flushindex < size; flushindex++){
-    segment[flushindex] = tree[flushindex];
+    if(tree[flushindex] != 0){
+       segment[flushindex] = tree[flushindex];
+       printf("appending %d ",tree[flushindex]);
+    }  
   }
+  printf("\n");
   int* sortedseg = mergesort(segment, size);
-  table.segtable[*table.currentSeg] = sortedseg;
+  table.segtable[nextseg] = sortedseg;
   printf("Flushing b-tree into sstable...\n");
-  (*table.currentSeg)++;
   showSSTable(table);
 }
 
 void compaction(int* seg1, int* seg2, int size1, int size2,struct SSTable table){
+  printf("Compacting two segments...of total size %d\n", size1 + size2);
   int* nextseg = malloc((size1 + size2) * sizeof(int));
-  int nextsegindex = 0;
-  int duplicate = 0;
-  for(int slaprin = 0; slaprin < size2; slaprin++){
-    nextseg[nextsegindex] = seg2[slaprin];
-  }
-  for(int indexl = 0; indexl < size1; indexl++){
-    for(int indexr = 0; indexr < size1; indexr++){
-      if(nextseg[nextsegindex] == seg1[indexr]){
-        duplicate = 1;
-      }
-    }
-    if(duplicate == 1){
-      nextsegindex++;
-      duplicate = 0;
-    }
-    else{
-      nextseg[nextsegindex] = seg1[indexl];
-      nextsegindex++;
+  for(int index = 0; index < size1 + size2; index++){
+    if(index < size1){
+      nextseg[index] = seg1[index];
+    }else{
+      nextseg[index] = seg2[index - size1];
     }
   }
-  flush(nextseg, size1+size2, table);
+  flush(nextseg, (size1 + size2), table);
   showSSTable(table);
 }
 
 int main(){
   int arraysize = 6;
-  int* ptr = malloc(arraysize* sizeof(int));
+  int* ptr = malloc(arraysize * sizeof(int));
   ptr[0] = 1;
   ptr[1] = 5;
   ptr[2] = 4;
   ptr[3] = 2;
   ptr[4] = 5;
   ptr[5] = 76;
-  int* ptr2 = malloc(arraysize* sizeof(int));
+  int* ptr2 = malloc(arraysize * sizeof(int));
   ptr2[0] = 22;
   ptr2[1] = 3;
   ptr2[2] = 4;
@@ -225,11 +219,12 @@ int main(){
 	int* treed = btreeify(ptr,arraysize);
   int* treed2 = btreeify(ptr2,arraysize);
   struct SSTable testTable;
-  int* segs = malloc(arraysize * 2 * sizeof(int));
-  int* segsizes = malloc(arraysize * 2 * sizeof(int));
+  int* segs = malloc(arraysize * 200 * sizeof(int));
+  int* segsizes = malloc(200 * sizeof(int));
   testTable.segtable = &segs;
   testTable.segsizes = segsizes;
   testTable.currentSeg = malloc(sizeof(int));
+  testTable.currentSeg[0] = -1;
   flush(treed, arraysize * 2, testTable);
   flush(treed2,arraysize * 2, testTable);
   compaction(testTable.segtable[0],testTable.segtable[1],12, 12, testTable);
