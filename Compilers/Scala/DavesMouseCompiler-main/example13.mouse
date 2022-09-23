@@ -1,0 +1,54 @@
+' 11 FAILS <> not supported
+
+"Enter Literal Element To Sort: " F ? =
+"Enter Literal Element To Sort: " S ? =
+"Enter Literal Element To Sort: " R ? =
+"Enter Literal Element To Sort: " H ? =
+"sorting: "
+F . !
+" "S . !
+" "R . !
+" "H . !
+" -> "
+f F. =
+s S. =
+r R. =
+h H. =
+a 0 =
+b 0 =
+c 0 =
+d 0 =
+p 0 =
+
+(
+' this portion adds and subtracts from flags unless a value is subtracted to zero
+    f.[a a. 1 + =]
+    s.[b b. 1 + =]
+    r.[c c. 1 + =]
+    h.[d d. 1 + =]
+    a a. 1 -=
+    b b. 1 -=
+    c c. 1 -=
+    d d. 1 -=
+' Each temporary copy of element is subtracted evenly until next least element found
+    a.[" "F.! p p. 1 += a a. 1 +=]
+    b.[" "S.! p p. 1 += b b. 1 +=]
+    c.[" "R.! p p. 1 +=  c c. 1 +=]
+    d.[" "H.! p p. 1 +=  d d. 1 +=]
+' due to lack of second stack and <> support at the time, least item is popped immediately
+    f f. 1 -=
+    s s. 1 -=
+    r r. 1 -=
+    h h. 1 -=
+
+' repeats this process until done, since bubblesort can't work here
+    p. p. 4 - ^
+)
+$$
+
+
+
+
+
+
+
